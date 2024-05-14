@@ -115,5 +115,5 @@ omega_factors = {dir: get_orientation_factor(dir, latitude) for dir in opaque_co
 a, b, c = coefficients[climate_zone]
 
 # Calculate RETV
-retv = calculate_RETV(A_envelope, a, b, c, opaque_components, non_opaque_components, SHGC_eq=None, omega_factors=omega_factors)
+retv = calculate_RETV(A_envelope, a, b, c, opaque_components, non_opaque_components, omega_factors)
 print("RETV:", retv)
