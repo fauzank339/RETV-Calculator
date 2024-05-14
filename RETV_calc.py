@@ -49,7 +49,7 @@ def calculate_RETV(A_envelope, a, b, c, opaque_components, non_opaque_components
     - b (float): Coefficient 'b' for the specific climate zone.
     - c (float): Coefficient 'c' for the specific climate zone.
     - opaque_components (dict): Dictionary containing areas and U-values of opaque components.
-    - non_opaque_components (dict): Dictionary containing areas and U-values of non-opaque components.
+    - non_opaque_components (dict): Dictionary containing areas, U-values, and SHGC values of non-opaque components.
     - SHGC_eq (dict): Dictionary containing SHGC equivalent values of non-opaque components.
     - omega_factors (dict): Dictionary containing orientation factors for cardinal directions.
 
@@ -57,8 +57,8 @@ def calculate_RETV(A_envelope, a, b, c, opaque_components, non_opaque_components
     - float: Calculated RETV.
     """
     sum_opaque = sum(sum(component['area'] * component['U'] * omega_factors[dir] for component in components) for dir, components in opaque_components.items())
-    sum_non_opaque = sum(sum(component['area'] * component['U'] * SHGC_eq[dir] * omega_factors[dir] for component in components) for dir, components in non_opaque_components.items())
-    sum_SHGC_eq = sum(sum(component['area'] * SHGC_eq[dir] * omega_factors[dir] for component in components) for dir, components in non_opaque_components.items())
+    sum_non_opaque = sum(sum(component['area'] * component['U'] * component['SHGC'] * omega_factors[dir] for component in components) for dir, components in non_opaque_components.items())
+    sum_SHGC_eq = sum(sum(component['area'] * component['SHGC'] * omega_factors[dir] for component in components) for dir, components in non_opaque_components.items())
     
     retv = (1 / A_envelope) * (a * sum_opaque + b * sum_non_opaque + c * sum_SHGC_eq)
     return retv
@@ -72,7 +72,6 @@ coefficients = {
     "Temperate": (3.38, 0.37, 63.69)
 }
 
-# Example usage:
 print("Please enter the required information:")
 climate_zone = input("Enter climate zone (Composite, Hot-Dry, Warm-Humid, or Temperate): ").strip()
 
@@ -96,22 +95,16 @@ for dir in ["North", "South", "East", "West"]:
 
 # User input for non-opaque components associated with cardinal directions
 non_opaque_components = {}
-for dir in ["North", "South"]:
+for dir in ["North", "South", "East", "West"]:
     num_non_opaque_components = int(input(f"How many non-opaque components do you have for {dir}? "))
     non_opaque_components[dir] = []
     for _ in range(num_non_opaque_components):
-        area = float(input(f"Enter area of non-opaque component for {dir} (m²): "))
-        U = float(input(f"Enter U-value of non-opaque component for {dir} (W/m².K): "))
-        non_opaque_components[dir].append({"area": area, "U": U})
+        area, U, SHGC = map(float, input(f"Enter area, U-value, and SHGC of non-opaque component for {dir} (separated by space): ").split())
+        non_opaque_components[dir].append({"area": area, "U": U, "SHGC": SHGC})
 
 # Calculate total envelope area by summing up areas of all opaque and non-opaque components
 A_envelope = sum(sum(component['area'] for component in components) for components in opaque_components.values()) + \
              sum(sum(component['area'] for component in components) for components in non_opaque_components.values())
-
-# User input for SHGC equivalent values associated with cardinal directions
-SHGC_eq = {}
-for dir in ["North", "South"]:
-    SHGC_eq[dir] = float(input(f"Enter SHGC of non-opaque component for {dir}: "))
 
 # Calculate latitude from user input
 latitude = float(input("Enter the latitude of the location: "))
@@ -123,5 +116,5 @@ omega_factors = {dir: get_orientation_factor(dir, latitude) for dir in opaque_co
 a, b, c = coefficients[climate_zone]
 
 # Calculate RETV
-retv = calculate_RETV(A_envelope, a, b, c, opaque_components, non_opaque_components, SHGC_eq, omega_factors)
+retv = calculate_RETV(A_envelope, a, b, c, opaque_components, non_opaque_components, SHGC_eq=None, omega_factors=omega_factors)
 print("RETV:", retv)
