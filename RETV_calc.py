@@ -39,7 +39,7 @@ def get_orientation_factor(cardinal_direction, latitude):
         return None
 
 
-def calculate_RETV(A_envelope, a, b, c, opaque_components, non_opaque_components, SHGC_eq, omega_factors):
+def calculate_RETV(A_envelope, a, b, c, opaque_components, non_opaque_components, omega_factors):
     """
     Calculate Residential Envelope Transmission Value (RETV) based on the given parameters.
 
@@ -50,17 +50,16 @@ def calculate_RETV(A_envelope, a, b, c, opaque_components, non_opaque_components
     - c (float): Coefficient 'c' for the specific climate zone.
     - opaque_components (dict): Dictionary containing areas and U-values of opaque components.
     - non_opaque_components (dict): Dictionary containing areas, U-values, and SHGC values of non-opaque components.
-    - SHGC_eq (dict): Dictionary containing SHGC equivalent values of non-opaque components.
     - omega_factors (dict): Dictionary containing orientation factors for cardinal directions.
 
     Returns:
     - float: Calculated RETV.
     """
     sum_opaque = sum(sum(component['area'] * component['U'] * omega_factors[dir] for component in components) for dir, components in opaque_components.items())
-    sum_non_opaque = sum(sum(component['area'] * component['U'] * component['SHGC'] * omega_factors[dir] for component in components) for dir, components in non_opaque_components.items())
-    sum_SHGC_eq = sum(sum(component['area'] * component['SHGC'] * omega_factors[dir] for component in components) for dir, components in non_opaque_components.items())
+    sum_non_opaque_U = sum(sum(component['area'] * component['U'] * omega_factors[dir] for component in components) for dir, components in non_opaque_components.items())
+    sum_non_opaque_SHGC = sum(sum(component['area'] * component['SHGC'] * omega_factors[dir] for component in components) for dir, components in non_opaque_components.items())
     
-    retv = (1 / A_envelope) * (a * sum_opaque + b * sum_non_opaque + c * sum_SHGC_eq)
+    retv = (1 / A_envelope) * (a * sum_opaque + b * sum_non_opaque_U + c * sum_non_opaque_SHGC)
     return retv
 
 
