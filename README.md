@@ -39,4 +39,4 @@ Orientation factors are determined based on the latitude of the location and the
 
 This script provides a convenient tool for architects, engineers, and building designers to evaluate the energy performance of residential buildings and make informed decisions regarding building envelope design and energy efficiency measures.
 
-For any further inquiries or issues, please contact the developer.
+For any further inquiries or issues, feel free to contact.
